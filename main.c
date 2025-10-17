@@ -51,18 +51,21 @@ int player_pop(struct player * /*nonull*/ self)
 
 	self->nigh[0]->nigh[1] = self->nigh[1];
 
-	if (self->nigh[1] != NULL) {
-		self->nigh[1]->nigh[0] = self->nigh[0];
-		self->nigh[1] = NULL;
+	if (self->nigh[1] == NULL) {
+		fprintf(stderr, "right-neighbor should never be NULL for a node that is in the list presently\n");
+		exit(1);
 	}
 
+	self->nigh[1]->nigh[0] = self->nigh[0];
+
+	self->nigh[1] = NULL;
 	self->nigh[0] = NULL;
 
 	return 0;
 }
 int player_append(struct player * /*nonull*/ head, struct player * /*nonull*/ self)
 {
-	self->nigh[1] = NULL;
+	self->nigh[1] = head;
 	if (head->nigh[0] == NULL) {
 		head->nigh[0] = self;
 		head->nigh[1] = self;
@@ -108,6 +111,7 @@ int main(int argc, char **argv)
 	char winner[MAXSTRING] = {0};
 	char loser[MAXSTRING] = {0};
 	char TEMP;
+	int TEMP2;
 	while (1) {
 
 		bytesRead = readUntil(f, NULL, 0, ',');
@@ -122,9 +126,15 @@ int main(int argc, char **argv)
 
 		if (bytesRead < 0) break;
 
-		//printLadder(head);
+		/* //DEBUG
+		system("clear");
+		printf("(%d) ", TEMP2);
+		TEMP2++;
+		printLadder(head);
 		//printf("\n\n");
-		//scanf("%c", &TEMP);
+		scanf("%c", &TEMP);
+		*/
+
 	}
 
 	fclose(f);
@@ -177,14 +187,15 @@ int printLadder(struct player * /*nonull*/ head)
 
 	printf("Chess Ladder:\n=========================\n\n");
 
+	// printf("[-1] %s\n", head->nigh[0]->name); //DEBUG
+
 	unsigned int i = 0;
 	struct player * /*nonull*/ current = head;
 	while (1) {
 		if (current->nigh[1] == NULL || current->nigh[1] == head) break;
 		current = current->nigh[1];
+		//if (current->wincount == 0) continue;
 		printf("[%u][%dw %dl]\t %s\n", ++i, current->wincount, current->losscount, current->name);
-		//printf("[%u]\t%s\t\t%dw %dl\n", ++i, current->name, current->wincount, current->losscount);
-		//printf("[%p] %s from:[%p] to:[%p]\n", current, current->name, current->nigh[0], current->nigh[1]);
 	}
 	return 0;
 }
