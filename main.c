@@ -27,10 +27,7 @@ int main(int argc, char **argv)
 	struct player *head = player_new("");
 
 	FILE *f = fopen(MATCHHISTORYFILE, "r");
-	if (f == NULL) {
-		fprintf(stderr, "failed to open file\n");
-		exit(1);
-	}
+	if (f == NULL) panic("failed to open file\n");
 
 	int bytesRead = 0;
 	char idfield[MAXSTRING] = {0};
@@ -108,10 +105,7 @@ int climb(struct player * /*nonull*/ head, int isDraw, const char winnerName[res
 
 	if (winnerAlreadyHigher) {
 
-		if (winner == NULL) {
-			fprintf(stderr, "winner must exist because they were found first\n");
-			exit(1);
-		}
+		if (winner == NULL) panic("winner must exist because they were found first\n");
 
 		if (loser == NULL) {
 			loser = player_new(loserName);
@@ -125,18 +119,12 @@ int climb(struct player * /*nonull*/ head, int isDraw, const char winnerName[res
 	}
 
 	/* untrue, might be that neither exist
-	if (loser == NULL) {
-		fprintf(stderr, "loser must exist because they were found first\n");
-		exit(1);
-	}
+	if (loser == NULL) panic("loser must exist because they were found first\n");
 	*/
 	if (loser == NULL) {
 		loser = player_new(loserName);
 
-		if (winner != NULL) {
-			fprintf(stderr, "winner must not exist either, otherwise would be found first\n");
-			exit(1);
-		}
+		if (winner != NULL) panic("winner must not exist either, otherwise would be found first\n");
 
 		winner = player_new(winnerName);
 

@@ -8,10 +8,7 @@
 struct player * /*nonull*/ player_new(const char * /*nonull*/ name)
 {
 	struct player *self = malloc(sizeof(struct player));
-	if (self == NULL) {
-		fprintf(stderr, "malloc failed\n");
-		exit(1);
-	}
+	if (self == NULL) panic("malloc failed\n");
 	*self = (struct player){0};
 	strncpy(self->name, name, MAXSTRING);
 	self->name[MAXSTRING - 1] = '\0';
@@ -21,17 +18,11 @@ struct player * /*nonull*/ player_new(const char * /*nonull*/ name)
 int player_pop(struct player * /*nonull*/ self)
 {
 
-	if (self->nigh[0] == NULL) {
-		fprintf(stderr, "left-neighbor should never be NULL for a node that is in the list presently\n");
-		exit(1);
-	}
+	if (self->nigh[0] == NULL) panic("left-neighbor should never be NULL for a node that is in the list presently\n");
 
 	self->nigh[0]->nigh[1] = self->nigh[1];
 
-	if (self->nigh[1] == NULL) {
-		fprintf(stderr, "right-neighbor should never be NULL for a node that is in the list presently\n");
-		exit(1);
-	}
+	if (self->nigh[1] == NULL) panic("right-neighbor should never be NULL for a node that is in the list presently\n");
 
 	self->nigh[1]->nigh[0] = self->nigh[0];
 
@@ -61,10 +52,7 @@ int player_append(struct player * /*nonull*/ head, struct player * /*nonull*/ se
 int player_insertAbove(struct player * /*nonull*/ aboveMe, struct player * /*nonull*/ insertMe)
 {
 
-	if (aboveMe->nigh[0] == NULL) {
-		fprintf(stderr, "should never be NULL since head is above all\n");
-		exit(1);
-	}
+	if (aboveMe->nigh[0] == NULL) panic("should never be NULL since head is above all\n");
 
 	aboveMe->nigh[0]->nigh[1] = insertMe;
 	insertMe->nigh[0] = aboveMe->nigh[0];

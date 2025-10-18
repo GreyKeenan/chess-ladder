@@ -11,10 +11,7 @@ int readUntil(FILE *f, char *output, int maxLength, char delimiter)
 	int bytesRead = 0;
 	int bytesWritten = 0;
 	while (1) {
-		if (bytesRead == INT_MAX) {
-			fprintf(stderr, "read too far before delimiter reached\n");
-			exit(1);
-		}
+		if (bytesRead == INT_MAX) panic("read too far before delimiter reached\n");
 		c = getc(f);
 		bytesRead++;
 
