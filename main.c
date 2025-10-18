@@ -1,24 +1,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <limits.h>
+
+#include "./utilities.h"
+#include "./player.h"
+#include "./input.h"
+#include "./output.h"
 
 
 #define MATCHHISTORYFILE "input.csv"
 
 
-#define MAXSTRING 32
-struct player {
-	struct player *nigh[2];
-	char name[MAXSTRING];
-	int wincount;
-	int drawcount;
-	int losscount;
-};
-
-
-int readUntil(FILE *f, char *output, int maxLength, char delimiter);
-int printLadder(struct player * /*nonull*/ head);
 int climb(struct player * /*nonull*/ head, int isDraw, const char winnerName[restrict static MAXSTRING], const char loserName[restrict static MAXSTRING]);
 int findPlayers(
 	struct player * /*nonull*/ head,
@@ -27,73 +19,6 @@ int findPlayers(
 	struct player *winner_out[restrict static 1],
 	struct player *loser_out[restrict static 1]
 );
-
-
-struct player * /*nonull*/ player_new(const char * /*nonull*/ name)
-{
-	struct player *self = malloc(sizeof(struct player));
-	if (self == NULL) {
-		fprintf(stderr, "malloc failed\n");
-		exit(1);
-	}
-	*self = (struct player){0};
-	strncpy(self->name, name, MAXSTRING);
-	self->name[MAXSTRING - 1] = '\0';
-	return self;
-}
-int player_pop(struct player * /*nonull*/ self)
-{
-
-	if (self->nigh[0] == NULL) {
-		fprintf(stderr, "left-neighbor should never be NULL for a node that is in the list presently\n");
-		exit(1);
-	}
-
-	self->nigh[0]->nigh[1] = self->nigh[1];
-
-	if (self->nigh[1] == NULL) {
-		fprintf(stderr, "right-neighbor should never be NULL for a node that is in the list presently\n");
-		exit(1);
-	}
-
-	self->nigh[1]->nigh[0] = self->nigh[0];
-
-	self->nigh[1] = NULL;
-	self->nigh[0] = NULL;
-
-	return 0;
-}
-int player_append(struct player * /*nonull*/ head, struct player * /*nonull*/ self)
-{
-	self->nigh[1] = head;
-	if (head->nigh[0] == NULL) {
-		head->nigh[0] = self;
-		head->nigh[1] = self;
-		self->nigh[0] = head;
-		return 0;
-	}
-
-	head->nigh[0]->nigh[1] = self;
-	self->nigh[0] = head->nigh[0];
-	head->nigh[0] = self;
-
-	return 0;
-}
-int player_insertAbove(struct player * /*nonull*/ aboveMe, struct player * /*nonull*/ insertMe)
-{
-
-	if (aboveMe->nigh[0] == NULL) {
-		fprintf(stderr, "should never be NULL since head is above all\n");
-		exit(1);
-	}
-
-	aboveMe->nigh[0]->nigh[1] = insertMe;
-	insertMe->nigh[0] = aboveMe->nigh[0];
-	aboveMe->nigh[0] = insertMe;
-	insertMe->nigh[1] = aboveMe;
-
-	return 0;
-}
 
 
 int main(int argc, char **argv)
@@ -157,60 +82,6 @@ int main(int argc, char **argv)
 
 	// free LL if prog didn't end here
 
-	return 0;
-}
-
-int readUntil(FILE *f, char *output, int maxLength, char delimiter)
-{
-	int c = 0;
-	int bytesRead = 0;
-	int bytesWritten = 0;
-	while (1) {
-		if (bytesRead == INT_MAX) {
-			fprintf(stderr, "read too far before delimiter reached\n");
-			exit(1);
-		}
-		c = getc(f);
-		bytesRead++;
-
-		if (c == delimiter) break;
-		else if (c == EOF) {
-			bytesRead *= -1;
-			break;
-		}
-
-		if (bytesRead <= maxLength) {
-			output[bytesRead - 1] = c;
-			bytesWritten++;
-		}
-	}
-
-	if (output == NULL || maxLength == 0) return bytesRead;
-
-	if (bytesWritten >= maxLength) {
-		output[maxLength - 1] = '\0';
-	} else {
-		output[bytesWritten] = '\0';
-	}
-
-	return bytesRead;
-}
-
-int printLadder(struct player * /*nonull*/ head)
-{
-
-	printf("Chess Ladder:\n=========================\n\n");
-
-	// printf("[-1] %s\n", head->nigh[0]->name); //DEBUG
-
-	unsigned int i = 0;
-	struct player * /*nonull*/ current = head;
-	while (1) {
-		if (current->nigh[1] == NULL || current->nigh[1] == head) break;
-		current = current->nigh[1];
-		//if (current->wincount == 0) continue;
-		printf("[%u][%dw %dl]\t %s\n", ++i, current->wincount, current->losscount, current->name);
-	}
 	return 0;
 }
 
