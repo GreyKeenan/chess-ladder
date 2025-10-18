@@ -108,22 +108,35 @@ int main(int argc, char **argv)
 	}
 
 	int bytesRead = 0;
+	char idfield[MAXSTRING] = {0};
 	char winner[MAXSTRING] = {0};
 	char loser[MAXSTRING] = {0};
-	char TEMP;
-	int TEMP2;
+	int isDraw = 0;
+	//char TEMP;
+	//int TEMP2;
 	while (1) {
 
-		bytesRead = readUntil(f, NULL, 0, ',');
+		bytesRead = readUntil(f, idfield, MAXSTRING, ','); // ID
 		if (bytesRead < 0) break;
-		bytesRead = readUntil(f, winner, MAXSTRING, ',');
+		bytesRead = readUntil(f, winner, MAXSTRING, ','); // winner
 		if (bytesRead < 0) break;
-		bytesRead = readUntil(f, loser, MAXSTRING, ',');
+		bytesRead = readUntil(f, loser, MAXSTRING, ','); // loser
 		if (bytesRead < 0) break;
-		bytesRead = readUntil(f, NULL, 0, '\n');
+
+		bytesRead = readUntil(f, NULL, 0, ','); // drawFlag
+		if (bytesRead < 0) break;
+		isDraw = (bytesRead > 1); // means it read some data besides just the comma
+
+		bytesRead = readUntil(f, NULL, 0, '\n'); // date
+
+		if (isDraw) {
+			isDraw = 0;
+			printf("TODO: draw (#%s) ignored between \"%s\" and \"%s\".\n",
+				idfield, winner, loser);
+			continue;
+		}
 
 		climb(head, 0, winner, loser);
-
 		if (bytesRead < 0) break;
 
 		/* //DEBUG
@@ -139,6 +152,7 @@ int main(int argc, char **argv)
 
 	fclose(f);
 
+	printf("\n\n");
 	printLadder(head);
 
 	// free LL if prog didn't end here
