@@ -1,64 +1,44 @@
 #include "./player.h"
 
-#include "utilities.h"
+#include "./utilities.h"
 
 #include <string.h>
 
 
-struct player * /*nonull*/ player_new(const char * /*nonull*/ name)
+struct ladder_player * /*nonull*/ ladder_player_new(const char * /*nonull*/ name)
 {
-	struct player *self = malloc(sizeof(struct player));
+	struct ladder_player *self = malloc(sizeof(struct ladder_player));
 	if (self == NULL) panic("malloc failed\n");
-	*self = (struct player){0};
-	strncpy(self->name, name, MAXSTRING);
-	self->name[MAXSTRING - 1] = '\0';
+
+	*self = (struct ladder_player){0};
+
+	self->superior = self;
+	self->inferior = self;
+
+	strncpy(self->name, name, ladder_STRMAX);
+	self->name[ladder_STRMAX - 1] = '\0';
+
 	return self;
 }
 
-int player_pop(struct player * /*nonull*/ self)
+void ladder_player_pop(struct ladder_player * /*nonull*/ self)
 {
-
-	if (self->nigh[0] == NULL) panic("left-neighbor should never be NULL for a node that is in the list presently\n");
-
-	self->nigh[0]->nigh[1] = self->nigh[1];
-
-	if (self->nigh[1] == NULL) panic("right-neighbor should never be NULL for a node that is in the list presently\n");
-
-	self->nigh[1]->nigh[0] = self->nigh[0];
-
-	self->nigh[1] = NULL;
-	self->nigh[0] = NULL;
-
-	return 0;
+	self->superior->inferior = self->inferior;
+	self->inferior->superior = self->superior;
+	self->superior = self;
+	self->inferior = self;
 }
-
-int player_append(struct player * /*nonull*/ head, struct player * /*nonull*/ self)
+void ladder_player_pass(struct ladder_player * /*nonull*/ winner, struct ladder_player * /*nonull*/ loser)
 {
-	self->nigh[1] = head;
-	if (head->nigh[0] == NULL) {
-		head->nigh[0] = self;
-		head->nigh[1] = self;
-		self->nigh[0] = head;
-		return 0;
-	}
-
-	head->nigh[0]->nigh[1] = self;
-	self->nigh[0] = head->nigh[0];
-	head->nigh[0] = self;
-
-	return 0;
+	winner->inferior = loser;
+	winner->superior = loser->superior;
+	loser->superior->inferior = winner;
+	loser->superior = winner;
 }
-
-int player_insertAbove(struct player * /*nonull*/ aboveMe, struct player * /*nonull*/ insertMe)
+void ladder_player_follow(struct ladder_player * /*nonull*/ ahead, struct ladder_player * /*nonull*/ behind)
 {
-
-	if (aboveMe->nigh[0] == NULL) panic("should never be NULL since head is above all\n");
-
-	aboveMe->nigh[0]->nigh[1] = insertMe;
-	insertMe->nigh[0] = aboveMe->nigh[0];
-	aboveMe->nigh[0] = insertMe;
-	insertMe->nigh[1] = aboveMe;
-
-	return 0;
+	behind->superior = ahead;
+	behind->inferior = ahead->inferior;
+	ahead->inferior->superior = behind;
+	ahead->inferior = behind;
 }
-
