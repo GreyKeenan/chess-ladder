@@ -18,7 +18,7 @@ int readUntil(FILE *f, char *output, int maxLength, char delimiter);
 
 int main(int argc, char **argv)
 {
-	if (argc < 2) panic("input file not provided\n");
+	if (argc != 2) panic("This program requires exactly 1 command-line argument. Please provide the name of an appropriately-formatted CSV file to read from.\n");
 	char *inputFile = argv[1];
 
 	FILE *f = fopen(inputFile, "r");
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 
 void printLadder(struct ladder_player *leader)
 {
-	printf("Chess Ladder:\n====================\n\n");
+	printf("\nChess Ladder:\n====================\n\n");
 
 	if (leader == NULL) {
 		printf("0 players\n");
@@ -52,6 +52,8 @@ void printLadder(struct ladder_player *leader)
 		printf("[%u][%dw %dl]\t %s\n", ++i, current->wins, current->losses, current->name);
 		current = current->inferior;
 	} while (current != leader);
+
+	printf("\n");
 }
 
 ladder_matchSource readMatch;
