@@ -8,9 +8,6 @@
 #include "player.h"
 
 
-#define MATCHHISTORYFILE "input.csv"
-
-
 void printLadder(struct ladder_player *leader);
 ladder_matchSource readMatch;
 int readUntil(FILE *f, char *output, int maxLength, char delimiter);
