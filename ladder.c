@@ -51,9 +51,9 @@ int ladder_generate(
 		//sneeze("match #%d: (%d)(%d)(%s)(%s)\n", matchCount, date, isDraw, winnerName, loserName);
 
 		if (isDraw) {
-			//ladder_processDraw(&leader, date, winnerName, loserName);
-			sneeze("TODO: draw (#%d) ignored between \"%s\" and \"%s\".\n",
-				matchCount, winnerName, loserName);
+			ladder_processDraw(&leader, date, winnerName, loserName);
+			//sneeze("TODO: draw (#%d) ignored between \"%s\" and \"%s\".\n",
+			//	matchCount, winnerName, loserName);
 			continue;
 		}
 		ladder_processVictory(&leader, date, winnerName, loserName);
@@ -115,14 +115,73 @@ static inline void ladder_processVictory(
 static inline void ladder_processDraw(
 	struct ladder_player *leader[restrict static 1],
 	unsigned int date,
-	const char oneName[restrict static ladder_STRMAX],
-	const char twoName[restrict static ladder_STRMAX]
+	const char nameOne[restrict static ladder_STRMAX],
+	const char nameTwo[restrict static ladder_STRMAX]
 ) {
-	struct ladder_player *one = NULL;
-	struct ladder_player *two = NULL;
-	int oneHigher = findPlayers(*leader, oneName, twoName, &one, &two);
+	struct ladder_player *nick = NULL; // named in honor of the players who made the first draw in our club
+	struct ladder_player *logan = NULL;
+	int nickHigher = findPlayers(*leader, nameOne, nameTwo, &nick, &logan);
 
-	// TODO
+	/*
+	Intended Functionality:
+	Place the lower-player directly beneath the higher-player.
+
+	if nickHigher:
+		if logan exists:
+			pop logan
+		else:
+			create logan
+		place logan below nick
+		increment draw counter
+	else:
+		if logan exists
+			if nick exists:
+				pop nick
+			else:
+				create nick
+			place nick below logan
+			increment draw counter
+		else:
+			(assert neither exist)
+			create nick
+			append nick
+			create logan
+			append logan
+			increment draw counter
+	*/
+
+	if (nickHigher) {
+		if (nick == NULL) panic("nick must exist.\n");
+
+		if (logan == NULL) logan = ladder_player_new(nameTwo);
+		else ladder_player_pop(logan);
+		ladder_player_follow(nick, logan);
+		nick->draws++;
+		logan->draws++;
+		// TODO date
+		return;
+	}
+
+	if (logan != NULL) {
+		if (nick == NULL) nick = ladder_player_new(nameOne);
+		else ladder_player_pop(nick);
+		ladder_player_follow(logan, nick);
+		nick->draws++;
+		logan->draws++;
+		// TODO date
+		return;
+	}
+
+	if (nick != NULL) panic("It must be that neither player exists here.\n");
+	nick = ladder_player_new(nameOne);
+	logan = ladder_player_new(nameTwo);
+	ladder_player_append(*leader, nick); //arbitrary
+	ladder_player_append(*leader, logan);
+	nick->draws++;
+	logan->draws++;
+	// TODO date
+
+	return;
 }
 
 
