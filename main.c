@@ -8,6 +8,11 @@
 #include "player.h"
 
 
+typedef int ladder_player_ASSERT_INTSIZE[(sizeof(int) > 2)? 1:-1];
+// confirm that the ladder_player.mostRecentGame field can hold arbitrary 6 digits
+// throws a compile-time error if int size is too small
+
+
 void printLadder(struct ladder_player *leader);
 ladder_matchSource readMatch;
 int readUntil(FILE *f, char *output, int maxLength, char delimiter);
@@ -46,7 +51,8 @@ void printLadder(struct ladder_player *leader)
 	struct ladder_player *current = leader;
 	do {
 		if (current == NULL) panic("NULL entry in the leaderboard\n");
-		printf("[%u][%dw %dl]\t %s\n", ++i, current->wins, current->losses, current->name);
+		printf("[%u][%dw %dl]\t %s", ++i, current->wins, current->losses, current->name);
+		printf(" (%d)\n", current->mostRecentGame);
 		current = current->inferior;
 	} while (current != leader);
 
@@ -75,8 +81,11 @@ int readMatch(
 	if (bytesRead < 0) return -1;
 	*isDraw = (bytesRead > 1); // means it read some data besides just the comma
 
-	bytesRead = readUntil(f, NULL, 0, '\n'); // date
-	//TODO: atoi the date
+	char dateString[ladder_STRMAX] = {0};
+	bytesRead = readUntil(f, dateString, ladder_STRMAX, '\n'); // date
+	if (bytesRead < 0) return -1;
+	// TODO validate string
+	*date = atoi(dateString);
 
 	return 0;
 }

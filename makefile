@@ -1,5 +1,5 @@
 
-inputFile= test-data.csv
+inputFile= test-data/251022.csv
 
 outputFile= generate-ladder.out
 

@@ -6,7 +6,7 @@
 #include <string.h>
 
 
-int findPlayers(
+int ladder_findPlayers(
 	struct ladder_player * /*nonull*/ leader,
 	const char winnerName[restrict static ladder_STRMAX],
 	const char loserName[restrict static ladder_STRMAX],
@@ -25,6 +25,7 @@ static inline void ladder_processDraw(
 	const char oneName[restrict static ladder_STRMAX],
 	const char twoName[restrict static ladder_STRMAX]
 );
+static inline void ladder_updateDate(struct ladder_player player[restrict static 1], int newDate);
 
 
 int ladder_generate(
@@ -72,7 +73,7 @@ static inline void ladder_processVictory(
 
 	struct ladder_player *winner = NULL;
 	struct ladder_player *loser = NULL;
-	int winnerHigher = findPlayers(*leader, winnerName, loserName, &winner, &loser);
+	int winnerHigher = ladder_findPlayers(*leader, winnerName, loserName, &winner, &loser);
 
 	if (winnerHigher) {
 		if (winner == NULL) panic("winner must exist\n");
@@ -82,7 +83,8 @@ static inline void ladder_processVictory(
 		}
 		winner->wins++;
 		loser->losses++;
-		//TODO: update date
+		ladder_updateDate(winner, date);
+		ladder_updateDate(loser, date);
 		return;
 	}
 
@@ -98,7 +100,8 @@ static inline void ladder_processVictory(
 
 		winner->wins++;
 		loser->losses++;
-		//TODO: update date
+		ladder_updateDate(winner, date);
+		ladder_updateDate(loser, date);
 		return;
 	}
 
@@ -108,7 +111,8 @@ static inline void ladder_processVictory(
 	winner->wins++;
 	loser->losses++;
 	if (loser == *leader) *leader = winner;
-	//TODO: update date
+	ladder_updateDate(winner, date);
+	ladder_updateDate(loser, date);
 	return;
 }
 
@@ -120,7 +124,7 @@ static inline void ladder_processDraw(
 ) {
 	struct ladder_player *nick = NULL; // named in honor of the players who made the first draw in our club
 	struct ladder_player *logan = NULL;
-	int nickHigher = findPlayers(*leader, nameOne, nameTwo, &nick, &logan);
+	int nickHigher = ladder_findPlayers(*leader, nameOne, nameTwo, &nick, &logan);
 
 	/*
 	Intended Functionality:
@@ -158,7 +162,8 @@ static inline void ladder_processDraw(
 		ladder_player_follow(nick, logan);
 		nick->draws++;
 		logan->draws++;
-		// TODO date
+		ladder_updateDate(nick, date);
+		ladder_updateDate(logan, date);
 		return;
 	}
 
@@ -168,7 +173,8 @@ static inline void ladder_processDraw(
 		ladder_player_follow(logan, nick);
 		nick->draws++;
 		logan->draws++;
-		// TODO date
+		ladder_updateDate(nick, date);
+		ladder_updateDate(logan, date);
 		return;
 	}
 
@@ -179,13 +185,14 @@ static inline void ladder_processDraw(
 	ladder_player_append(*leader, logan);
 	nick->draws++;
 	logan->draws++;
-	// TODO date
+	ladder_updateDate(nick, date);
+	ladder_updateDate(logan, date);
 
 	return;
 }
 
 
-int findPlayers(
+int ladder_findPlayers(
 	struct ladder_player * leader,
 	const char winnerName[restrict static ladder_STRMAX],
 	const char loserName[restrict static ladder_STRMAX],
@@ -217,4 +224,9 @@ int findPlayers(
 	} while (current != leader);
 
 	return winnerFoundFirst;
+}
+
+static inline void ladder_updateDate(struct ladder_player player[restrict static 1], int newDate)
+{
+	if (newDate > player->mostRecentGame) player->mostRecentGame = newDate;
 }
