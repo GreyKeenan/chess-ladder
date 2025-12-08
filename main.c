@@ -14,6 +14,7 @@ typedef int ladder_player_ASSERT_INTSIZE[(sizeof(int) > 2)? 1:-1];
 
 
 void printLadder(struct ladder_player *leader);
+void printLadder_csv(struct ladder_player *leader);
 ladder_matchSource readMatch;
 int readUntil(FILE *f, char *output, int maxLength, char delimiter);
 
@@ -31,11 +32,43 @@ int main(int argc, char **argv)
 	int e = ladder_generate(&leader, f, &readMatch);
 	if (e) panic("ladder generation failed with code (%d)\n", e);
 
-	printLadder(leader);
+	//printLadder(leader);
+	printLadder_csv(leader);
 
 	fclose(f);
 	// don't need to bother freeing the linked list in this case
 	return 0;
+}
+
+void printLadder_csv(struct ladder_player *leader)
+{
+	if (leader == NULL) {
+		printf("NULL LADDER\n");
+		return;
+	}
+
+	printf("Position,Name,Wins,Losses,Draws,TotalGames,LastPlayed\n");
+
+	unsigned int i = 0;
+	struct ladder_player *current = leader;
+	do {
+		if (current == NULL) panic("NULL entry in the leaderboard\n");
+
+		printf("%u,%s,%d,%d,%d,%d,%d\n",
+			++i,
+			current->name,
+			current->wins,
+			current->losses,
+			current->draws,
+			current->wins + current->losses + current->draws,
+			current->mostRecentGame
+		);
+
+		//printf("[%u][%dw %dl]\t %s", ++i, current->wins, current->losses, current->name);
+		//printf(" (%d)\n", current->mostRecentGame);
+		current = current->inferior;
+	} while (current != leader);
+	printf("\n");
 }
 
 void printLadder(struct ladder_player *leader)
