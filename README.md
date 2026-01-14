@@ -5,9 +5,7 @@ our chess-ladder for the Normandale Chess Club.
 
 ### Todo
 
-* process draws appropriately
 * input validation is important
-* keep track of the last-played date for each player
 
 
 A Tiny Bit of Documentation
@@ -60,7 +58,9 @@ Just:
 
 	./a.out FILENAME
 
-`test-data.csv` is what I have been using for testing.
+`test-data/SOMEFILE` is what I have been using for testing.
+
+The output is given as csv data to the `stdout`.
 
 
 Code Structure, briefly
